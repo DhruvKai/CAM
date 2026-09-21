@@ -1,0 +1,26 @@
+[
+  {
+    "id": "public",
+    "name": "Public",
+    "description": "Meant for anyone. Sharing it causes no harm.",
+    "color": "#2E9E5B"
+  },
+  {
+    "id": "internal",
+    "name": "Internal",
+    "description": "For employees only. Low harm if it leaks, but not for outsiders.",
+    "color": "#2F7DD1"
+  },
+  {
+    "id": "confidential",
+    "name": "Confidential",
+    "description": "Sensitive business or personal data. Leaking it would cause real harm.",
+    "color": "#E0902B"
+  },
+  {
+    "id": "restricted",
+    "name": "Restricted",
+    "description": "Highest sensitivity. Named people only. Legal, financial or safety damage if exposed.",
+    "color": "#D64545"
+  }
+]

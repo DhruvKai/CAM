@@ -1,0 +1,34 @@
+{
+  // Shown on the start screen. Keep it generic.
+  "eventTitle": "Data Sorting Game",
+
+  "cardsPerRound": 15,
+
+  // Scoring: no penalty for wrong answers.
+  "pointsPerCorrect": 10,
+  "streakThreshold": 3,        // bonus starts once this many correct answers in a row
+  "streakBonus": 2,
+  "speedBonusSeconds": 3,      // correct answers within this many seconds earn the speed bonus
+  "speedBonus": 2,
+
+  // 0 = no time limit per card.
+  "secondsPerCard": 0,
+
+  // Attempts per name that count for the leaderboard. 0 = unlimited. Extra plays are practice.
+  "maxOfficialAttempts": 1,
+
+  // Percent of easy / medium / tricky cards per round.
+  "difficultyMix": [40, 40, 20],
+
+  "showFeedback": true,
+  "soundEnabled": true,
+
+  // Full-screen kiosk. Set to false to run in a normal window.
+  "kioskMode": true,
+
+  // Show the leaderboard after this many idle seconds on the start screen. 0 = off.
+  "idleAttractSeconds": 60,
+
+  // Deterrent for casual users only, not real security. Change it before the event.
+  "adminPin": "1234"
+}
