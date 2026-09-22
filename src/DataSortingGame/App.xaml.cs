@@ -20,7 +20,7 @@ public partial class App : Application
                 $"The game could not start because a settings file has a problem:\n\n{ex.Message}\n\n" +
                 $"Fix the file in:\n{AppPaths.ResolveConfigDir(AppContext.BaseDirectory)}\n\n" +
                 "or delete it to restore the default.",
-                "Data Sorting Game", MessageBoxButton.OK, MessageBoxImage.Error);
+                "CAM", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
             return;
         }

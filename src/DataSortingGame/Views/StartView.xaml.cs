@@ -30,21 +30,16 @@ public partial class StartView : UserControl
 
     private static Border BuildLegendItem(Core.Models.Category cat, int index)
     {
-        var panel = new StackPanel();
-        panel.Children.Add(new TextBlock
+        var label = new TextBlock
         {
-            Text = $"{index + 1}  {cat.Name}", FontSize = 17, FontWeight = FontWeights.Bold,
-            Foreground = Ui.TextOn(cat.Color),
-        });
-        panel.Children.Add(new TextBlock
-        {
-            Text = cat.Description, FontSize = 12.5, Margin = new Thickness(0, 3, 0, 0),
-            Foreground = Ui.TextOn(cat.Color), Opacity = 0.9,
-        });
+            Text = $"{index + 1}  {cat.Name}", FontSize = cat.Name.Length > 12 ? 15 : 17, FontWeight = FontWeights.Bold,
+            Foreground = Ui.TextOn(cat.Color), TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Center,
+        };
         return new Border
         {
-            Background = Ui.Brush(cat.Color), CornerRadius = new CornerRadius(10), Padding = new Thickness(14, 10, 14, 12),
-            Margin = new Thickness(5, 0, 5, 0), Child = panel,
+            Background = Ui.Brush(cat.Color), CornerRadius = new CornerRadius(10), Padding = new Thickness(10, 10, 10, 12),
+            MinHeight = 52, Margin = new Thickness(5, 0, 5, 0), Child = label,
         };
     }
 
@@ -72,7 +67,8 @@ public partial class StartView : UserControl
     private void OnFieldKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key != Key.Enter) return;
-        if (sender == NameBox) DeptBox.Focus();
+        if (sender == NameBox) EcodeBox.Focus();
+        else if (sender == EcodeBox) DeptBox.Focus();
         else OnPlay(sender, e);
         e.Handled = true;
     }
@@ -85,10 +81,12 @@ public partial class StartView : UserControl
             NameBox.Focus();
             return;
         }
-        _nav.StartGame(name, DeptBox.Text);
+        _nav.StartGame(name, DeptBox.Text, EcodeBox.Text);
     }
 
     private void OnLeaderboard(object sender, RoutedEventArgs e) => _nav.ShowLeaderboard();
+
+    private void OnQuiz(object sender, RoutedEventArgs e) => _nav.ShowQuizStart();
 
     private void OnAdmin(object sender, RoutedEventArgs e) => _nav.RequestAdmin();
 }

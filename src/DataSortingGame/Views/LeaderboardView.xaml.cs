@@ -8,7 +8,7 @@ using DataSortingGame.Core.Services;
 
 namespace DataSortingGame.Views;
 
-public sealed record LeaderRow(string Rank, string Name, string Department, string Correct, string Time, string Score,
+public sealed record LeaderRow(string Rank, string Name, string EmployeeCode, string Department, string Correct, string Time, string Score,
     Brush RankBrush, Brush RowBrush);
 
 public partial class LeaderboardView : UserControl
@@ -35,6 +35,7 @@ public partial class LeaderboardView : UserControl
         Rows.ItemsSource = board.Select(e => new LeaderRow(
             e.Rank.ToString(CultureInfo.InvariantCulture),
             e.Result.PlayerName,
+            e.Result.EmployeeCode,
             e.Result.Department,
             $"{e.Result.CorrectCount}/{e.Result.TotalCards}",
             $"{e.Result.TotalSeconds:0.0}s",

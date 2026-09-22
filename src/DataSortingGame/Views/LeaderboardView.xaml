@@ -16,17 +16,19 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="80"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="230"/>
-                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="130"/>
+                <ColumnDefinition Width="190"/>
                 <ColumnDefinition Width="110"/>
-                <ColumnDefinition Width="110"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
             <TextBlock Text="Rank" Foreground="{StaticResource MutedBrush}" FontSize="15"/>
             <TextBlock Grid.Column="1" Text="Name" Foreground="{StaticResource MutedBrush}" FontSize="15"/>
-            <TextBlock Grid.Column="2" Text="Department" Foreground="{StaticResource MutedBrush}" FontSize="15"/>
-            <TextBlock Grid.Column="3" Text="Correct" Foreground="{StaticResource MutedBrush}" FontSize="15" TextAlignment="Right"/>
-            <TextBlock Grid.Column="4" Text="Time" Foreground="{StaticResource MutedBrush}" FontSize="15" TextAlignment="Right"/>
-            <TextBlock Grid.Column="5" Text="Score" Foreground="{StaticResource MutedBrush}" FontSize="15" TextAlignment="Right"/>
+            <TextBlock Grid.Column="2" Text="Employee code" Foreground="{StaticResource MutedBrush}" FontSize="15"/>
+            <TextBlock Grid.Column="3" Text="Department" Foreground="{StaticResource MutedBrush}" FontSize="15"/>
+            <TextBlock Grid.Column="4" Text="Correct" Foreground="{StaticResource MutedBrush}" FontSize="15" TextAlignment="Right"/>
+            <TextBlock Grid.Column="5" Text="Time" Foreground="{StaticResource MutedBrush}" FontSize="15" TextAlignment="Right"/>
+            <TextBlock Grid.Column="6" Text="Score" Foreground="{StaticResource MutedBrush}" FontSize="15" TextAlignment="Right"/>
         </Grid>
 
         <ScrollViewer x:Name="Scroller" Grid.Row="2" VerticalScrollBarVisibility="Auto" Focusable="False">
@@ -39,17 +41,19 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="230"/>
-                                        <ColumnDefinition Width="120"/>
+                                        <ColumnDefinition Width="130"/>
+                                        <ColumnDefinition Width="190"/>
                                         <ColumnDefinition Width="110"/>
-                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBlock Text="{Binding Rank}" Foreground="{Binding RankBrush}" FontSize="24" FontWeight="Bold"/>
                                     <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="22" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding Department}" FontSize="18" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="3" Text="{Binding Correct}" FontSize="18" TextAlignment="Right" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="4" Text="{Binding Time}" FontSize="18" TextAlignment="Right" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="5" Text="{Binding Score}" FontSize="24" FontWeight="Bold" TextAlignment="Right"
+                                    <TextBlock Grid.Column="2" Text="{Binding EmployeeCode}" FontSize="16" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding Department}" FontSize="18" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="4" Text="{Binding Correct}" FontSize="18" TextAlignment="Right" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="5" Text="{Binding Time}" FontSize="18" TextAlignment="Right" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="6" Text="{Binding Score}" FontSize="24" FontWeight="Bold" TextAlignment="Right"
                                                Foreground="{StaticResource AccentBrush}"/>
                                 </Grid>
                             </Border>

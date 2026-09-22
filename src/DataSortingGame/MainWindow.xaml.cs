@@ -29,7 +29,7 @@ public partial class MainWindow : Window
         PreviewMouseMove += (_, _) => Touch();
         PreviewMouseDown += (_, _) => OnActivity();
         PreviewTouchDown += (_, _) => OnActivity();
-        PreviewKeyDown += (_, _) => OnActivity();
+        PreviewKeyDown += (_, e) => { OnActivity(); if (e.Key == Key.Escape) OnEscape(); };
         _idleTimer.Tick += (_, _) => CheckIdle();
         _idleTimer.Start();
 
@@ -61,16 +61,34 @@ public partial class MainWindow : Window
 
     public void ShowLeaderboard(bool attract = false) => Navigate(new LeaderboardView(_state, this, attract));
 
-    public void StartGame(string name, string department)
+    public void StartGame(string name, string department, string employeeCode)
     {
         var official = _state.NextRoundIsOfficial(name);
         var cards = GameEngine.DrawCards(_state.Config.Cards, _state.Settings.CardsPerRound, _state.Settings.DifficultyMix);
         var session = new GameSession(cards, _state.Settings);
-        Navigate(new GameView(_state, this, session, name, department, official));
+        Navigate(new GameView(_state, this, session, name, department, employeeCode, official));
     }
 
-    /// <summary>Saves a finished (or abandoned) round and shows the result screen.</summary>
-    public void FinishRound(GameSession session, string name, string department, bool official)
+    public void ShowQuizStart() => Navigate(new QuizStartView(_state, this));
+
+    public void ShowQuizLeaderboard() => Navigate(new QuizLeaderboardView(_state, this));
+
+    public void StartQuiz(string name, string employeeCode)
+    {
+        var official = _state.NextQuizRoundIsOfficial(name);
+        var session = new QuizSession(_state.QuizQuestions, _state.QuizSettings, _state.QuizSettings.QuestionsPerRound);
+        Navigate(new QuizGameView(_state, this, session, name, employeeCode, official, openMode: false));
+    }
+
+    /// <summary>The host-led "open quiz": a group plays together, no name is recorded and nothing is scored.</summary>
+    public void StartOpenQuiz()
+    {
+        var session = new QuizSession(_state.QuizQuestions, _state.QuizSettings, totalTarget: null);
+        Navigate(new QuizGameView(_state, this, session, "", "", official: false, openMode: true));
+    }
+
+    /// <summary>Saves a finished (or abandoned) quiz round and shows the quiz result screen.</summary>
+    public void FinishQuizRound(QuizSession session, string name, string employeeCode, bool official)
     {
         if (session.Answered == 0)
         {
@@ -79,7 +97,37 @@ public partial class MainWindow : Window
             return;
         }
 
-        var result = session.ToResult(name, department, official);
+        var result = session.ToResult(name, employeeCode, official);
+        try
+        {
+            _state.QuizStore.Append(result);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show(this,
+                $"Your result could not be saved ({ex.Message}). Please tell the event organiser.",
+                Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        IReadOnlyList<QuizResult> all;
+        try { all = _state.QuizStore.LoadAll(); }
+        catch (IOException) { all = [result]; }
+
+        var board = QuizLeaderboard.Rank(all);
+        Navigate(new QuizResultView(_state, this, result, QuizLeaderboard.RankOf(all, result.Id), board.Count));
+    }
+
+    /// <summary>Saves a finished (or abandoned) round and shows the result screen.</summary>
+    public void FinishRound(GameSession session, string name, string department, string employeeCode, bool official)
+    {
+        if (session.Answered == 0)
+        {
+            // Nothing was answered, so nothing was revealed: don't burn the player's official attempt.
+            ShowStart();
+            return;
+        }
+
+        var result = session.ToResult(name, department, employeeCode, official);
         try
         {
             _state.Store.Append(result);
@@ -110,6 +158,13 @@ public partial class MainWindow : Window
     {
         _allowClose = true;
         Close();
+    }
+
+    /// <summary>Escape is a global exit shortcut, so a stray press can't close the kiosk unconfirmed.</summary>
+    private void OnEscape()
+    {
+        var result = MessageBox.Show(this, "Exit the game?", Title, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+        if (result == MessageBoxResult.Yes) ExitApplication();
     }
 
     private void Navigate(UserControl view)
@@ -149,7 +204,13 @@ public partial class MainWindow : Window
             case GameView game when idle >= GameIdleSeconds:
                 game.EndRound(); // walked away mid-round: record what was answered and free the kiosk
                 break;
+            case QuizGameView quiz when idle >= GameIdleSeconds:
+                quiz.EndRound(); // walked away mid-round: record what was answered and free the kiosk
+                break;
             case ResultView when idle >= ResultIdleSeconds:
+            case QuizResultView when idle >= ResultIdleSeconds:
+            case QuizStartView when idle >= ResultIdleSeconds:
+            case QuizLeaderboardView when idle >= ResultIdleSeconds:
             case LeaderboardView { IsAttract: false } when idle >= ResultIdleSeconds:
                 ShowStart();
                 break;

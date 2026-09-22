@@ -7,7 +7,7 @@ namespace DataSortingGame.Core.Services;
 public static class CsvExporter
 {
     private static readonly string[] Header =
-        ["Name", "Department", "Counts for leaderboard", "Score", "Correct", "Total cards", "Time (s)", "Played at", "Missed cards"];
+        ["Name", "Employee code", "Department", "Counts for leaderboard", "Score", "Correct", "Total cards", "Time (s)", "Played at", "Missed cards"];
 
     public static string ToCsv(IEnumerable<PlayerResult> results)
     {
@@ -19,6 +19,7 @@ public static class CsvExporter
             var fields = new[]
             {
                 r.PlayerName,
+                r.EmployeeCode,
                 r.Department,
                 r.IsOfficial ? "Yes" : "Practice",
                 r.Score.ToString(CultureInfo.InvariantCulture),

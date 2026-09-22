@@ -73,10 +73,11 @@ public sealed class GameSession
         return new AnswerOutcome(correct, chosenCategoryId is null, points, bonus, card.CategoryId, card.Explanation);
     }
 
-    public PlayerResult ToResult(string playerName, string department, bool isOfficial, DateTime? playedAtUtc = null) => new()
+    public PlayerResult ToResult(string playerName, string department, string employeeCode, bool isOfficial, DateTime? playedAtUtc = null) => new()
     {
         PlayerName = PlayerName.Normalize(playerName),
         Department = PlayerName.Normalize(department),
+        EmployeeCode = PlayerName.Normalize(employeeCode),
         Score = Score,
         CorrectCount = _answers.Count(a => a.Correct),
         TotalCards = _cards.Count,

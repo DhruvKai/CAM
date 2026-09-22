@@ -88,10 +88,11 @@ public class GameSessionTests
         s.Submit("right", 1);
         s.Submit("nope", 2);
         s.Submit("right", 3);
-        var r = s.ToResult("  Sam   Sample ", " Ops ", isOfficial: true);
+        var r = s.ToResult("  Sam   Sample ", " Ops ", " E123 ", isOfficial: true);
 
         Assert.Equal("Sam Sample", r.PlayerName);
         Assert.Equal("Ops", r.Department);
+        Assert.Equal("E123", r.EmployeeCode);
         Assert.Equal(2, r.CorrectCount);
         Assert.Equal(3, r.TotalCards);
         Assert.Equal(6.0, r.TotalSeconds);

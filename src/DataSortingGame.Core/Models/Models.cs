@@ -5,7 +5,6 @@ public sealed class Category
 {
     public string Id { get; set; } = "";
     public string Name { get; set; } = "";
-    public string Description { get; set; } = "";
     /// <summary>Hex colour such as #2E9E5B.</summary>
     public string Color { get; set; } = "#607D8B";
 }
@@ -26,7 +25,7 @@ public sealed class Card
 /// <summary>Tunable game rules. Loaded from settings.json; every value has a safe default.</summary>
 public sealed class GameSettings
 {
-    public string EventTitle { get; set; } = "Data Sorting Game";
+    public string EventTitle { get; set; } = "CAM";
     public int CardsPerRound { get; set; } = 15;
     public int PointsPerCorrect { get; set; } = 10;
     /// <summary>A correct answer earns <see cref="StreakBonus"/> once the streak reaches this length.</summary>
@@ -36,7 +35,7 @@ public sealed class GameSettings
     public double SpeedBonusSeconds { get; set; } = 3;
     public int SpeedBonus { get; set; } = 2;
     /// <summary>0 = no per-card time limit.</summary>
-    public int SecondsPerCard { get; set; } = 0;
+    public int SecondsPerCard { get; set; } = 45;
     /// <summary>Attempts per name that count for the leaderboard. 0 = unlimited. Extra plays are practice.</summary>
     public int MaxOfficialAttempts { get; set; } = 1;
     /// <summary>Percent mix of easy / medium / tricky cards in a round.</summary>
@@ -68,6 +67,8 @@ public sealed class PlayerResult
     public Guid Id { get; set; } = Guid.NewGuid();
     public string PlayerName { get; set; } = "";
     public string Department { get; set; } = "";
+    /// <summary>Optional employee code the player may enter alongside their name.</summary>
+    public string EmployeeCode { get; set; } = "";
     public int Score { get; set; }
     public int CorrectCount { get; set; }
     public int TotalCards { get; set; }
@@ -79,3 +80,73 @@ public sealed class PlayerResult
 }
 
 public sealed record LeaderboardEntry(int Rank, PlayerResult Result);
+
+/// <summary>A multiple-choice quiz question. Loaded from quizQuestions.json.</summary>
+public sealed class QuizQuestion
+{
+    public string Id { get; set; } = "";
+    public string Text { get; set; } = "";
+    public List<string> Options { get; set; } = [];
+    /// <summary>Index into <see cref="Options"/> of the correct answer.</summary>
+    public int CorrectIndex { get; set; }
+    /// <summary>1 = easy (green), 2 = medium (yellow), 3 = tricky (red).</summary>
+    public int Difficulty { get; set; } = 2;
+    public string Explanation { get; set; } = "";
+
+    /// <summary>1-based view of <see cref="CorrectIndex"/> for the admin editor grid; not persisted.</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public int CorrectOption
+    {
+        get => CorrectIndex + 1;
+        set => CorrectIndex = value - 1;
+    }
+}
+
+/// <summary>Tunable quiz rules. Loaded from quizSettings.json; every value has a safe default.</summary>
+public sealed class QuizSettings
+{
+    public string EventTitle { get; set; } = "CAM";
+    public int QuestionsPerRound { get; set; } = 15;
+    public int PointsPerCorrect { get; set; } = 10;
+    public int StreakThreshold { get; set; } = 3;
+    public int StreakBonus { get; set; } = 2;
+    /// <summary>Seconds allowed per question. The quiz always has a limit; this cannot be set to 0/off.</summary>
+    public int SecondsPerQuestion { get; set; } = 20;
+    /// <summary>Attempts per name that count for the leaderboard. 0 = unlimited. Extra plays are practice.</summary>
+    public int MaxOfficialAttempts { get; set; } = 1;
+    public bool ShowFeedback { get; set; } = true;
+    public bool SoundEnabled { get; set; } = true;
+}
+
+/// <summary>One answered question, stored so the security team can see which topics people miss.</summary>
+public sealed class QuizAnswer
+{
+    public string QuestionId { get; set; } = "";
+    public string QuestionText { get; set; } = "";
+    /// <summary>Null when time ran out, or when the question was only revealed (open quiz mode).</summary>
+    public int? ChosenIndex { get; set; }
+    public int CorrectIndex { get; set; }
+    public bool Correct { get; set; }
+    public double Seconds { get; set; }
+    public int Points { get; set; }
+    public int Difficulty { get; set; }
+}
+
+/// <summary>One finished quiz round for one player.</summary>
+public sealed class QuizResult
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string PlayerName { get; set; } = "";
+    /// <summary>Optional employee code the player may enter alongside their name.</summary>
+    public string EmployeeCode { get; set; } = "";
+    public int Score { get; set; }
+    public int CorrectCount { get; set; }
+    public int TotalQuestions { get; set; }
+    public double TotalSeconds { get; set; }
+    public DateTime PlayedAtUtc { get; set; } = DateTime.UtcNow;
+    /// <summary>False for practice rounds, which never appear on the leaderboard.</summary>
+    public bool IsOfficial { get; set; } = true;
+    public List<QuizAnswer> Answers { get; set; } = [];
+}
+
+public sealed record QuizLeaderboardEntry(int Rank, QuizResult Result);

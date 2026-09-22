@@ -81,6 +81,6 @@
         </StackPanel>
 
         <!-- Category boxes -->
-        <UniformGrid x:Name="Boxes" Grid.Row="3" Rows="1" Height="196" Margin="0,8,0,0"/>
+        <UniformGrid x:Name="Boxes" Grid.Row="3" Rows="1" Height="212" Margin="0,8,0,0"/>
     </Grid>
 </UserControl>

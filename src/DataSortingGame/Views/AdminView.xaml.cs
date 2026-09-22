@@ -8,7 +8,7 @@ using Microsoft.Win32;
 
 namespace DataSortingGame.Views;
 
-public sealed record AdminRow(Guid Id, string Name, string Department, string Counts, string Score, string Correct, string Time, string Played);
+public sealed record AdminRow(Guid Id, string Name, string EmployeeCode, string Department, string Counts, string Score, string Correct, string Time, string Played);
 
 public partial class AdminView : UserControl
 {
@@ -37,7 +37,7 @@ public partial class AdminView : UserControl
         }
 
         Grid.ItemsSource = all.OrderByDescending(r => r.PlayedAtUtc).Select(r => new AdminRow(
-            r.Id, r.PlayerName, r.Department, r.IsOfficial ? "Yes" : "Practice",
+            r.Id, r.PlayerName, r.EmployeeCode, r.Department, r.IsOfficial ? "Yes" : "Practice",
             r.Score.ToString(CultureInfo.InvariantCulture), $"{r.CorrectCount}/{r.TotalCards}", $"{r.TotalSeconds:0.0}s",
             r.PlayedAtUtc.ToLocalTime().ToString("dd MMM HH:mm", CultureInfo.InvariantCulture))).ToList();
 
@@ -54,8 +54,122 @@ public partial class AdminView : UserControl
     {
         var warnings = _state.Config.Warnings;
         WarningText.Text = warnings.Count == 0 ? "None." : string.Join("\n\n", warnings);
-        PathText.Text = $"Results:\n{_state.Store.Path}\n\nSettings folder:\n{_state.ConfigDir}\n\n" +
-                        $"{_state.Config.Cards.Count} cards, {_state.Categories.Count} categories loaded.";
+        PathText.Text = $"Results:\n{_state.Store.Path}\n\nQuiz results:\n{_state.QuizStore.Path}\n\nSettings folder:\n{_state.ConfigDir}\n\n" +
+                        $"{_state.Config.Cards.Count} cards, {_state.Categories.Count} categories, {_state.QuizQuestions.Count} quiz questions loaded.";
+        CardsPerRoundBox.Text = _state.Settings.CardsPerRound.ToString(CultureInfo.InvariantCulture);
+        SecondsPerCardBox.Text = _state.Settings.SecondsPerCard.ToString(CultureInfo.InvariantCulture);
+        QuestionsPerRoundBox.Text = _state.QuizSettings.QuestionsPerRound.ToString(CultureInfo.InvariantCulture);
+        SecondsPerQuestionBox.Text = _state.QuizSettings.SecondsPerQuestion.ToString(CultureInfo.InvariantCulture);
+    }
+
+    private void OnSaveQuizSettings(object sender, RoutedEventArgs e)
+    {
+        if (!int.TryParse(QuestionsPerRoundBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var questions) || questions < 1)
+        {
+            Error("Questions per round must be a whole number of 1 or more.");
+            return;
+        }
+        if (questions > _state.QuizQuestions.Count)
+        {
+            Error($"Only {_state.QuizQuestions.Count} quiz questions are loaded, so questions per round can't be more than that.");
+            return;
+        }
+        if (!int.TryParse(SecondsPerQuestionBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var seconds) || seconds < 5)
+        {
+            Error("Seconds per question must be a whole number of 5 or more. The quiz timer can't be turned off.");
+            return;
+        }
+
+        _state.QuizSettings.QuestionsPerRound = questions;
+        _state.QuizSettings.SecondsPerQuestion = seconds;
+        try
+        {
+            ConfigLoader.SaveQuizSettings(_state.ConfigDir, _state.QuizSettings);
+            _state.Reload();
+        }
+        catch (ConfigException ex)
+        {
+            Error($"The setting was not saved.\n\n{ex.Message}");
+            return;
+        }
+        _nav.ApplySettings();
+        ShowConfigInfo();
+        Info("Quiz settings saved. They apply to the next round.");
+    }
+
+    private void OnManageQuizQuestions(object sender, RoutedEventArgs e)
+    {
+        var dialog = new QuizQuestionsEditDialog(_state) { Owner = Owner };
+        if (dialog.ShowDialog() != true) return;
+
+        try
+        {
+            _state.Reload();
+        }
+        catch (ConfigException ex)
+        {
+            Error($"The quiz questions were saved, but could not be reloaded. The previous questions stay active.\n\n{ex.Message}");
+            return;
+        }
+        _nav.ApplySettings();
+        Refresh();
+        ShowConfigInfo();
+        Info("Quiz questions saved. They apply to the next round.");
+    }
+
+    private void OnSaveGameSettings(object sender, RoutedEventArgs e)
+    {
+        if (!int.TryParse(CardsPerRoundBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) || value < 1)
+        {
+            Error("Cards per round must be a whole number of 1 or more.");
+            return;
+        }
+        if (value > _state.Config.Cards.Count)
+        {
+            Error($"Only {_state.Config.Cards.Count} cards are loaded, so cards per round can't be more than that.");
+            return;
+        }
+        if (!int.TryParse(SecondsPerCardBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var seconds) || seconds < 0)
+        {
+            Error("Seconds per card must be 0 (no limit) or a positive whole number.");
+            return;
+        }
+
+        _state.Settings.CardsPerRound = value;
+        _state.Settings.SecondsPerCard = seconds;
+        try
+        {
+            ConfigLoader.SaveSettings(_state.ConfigDir, _state.Settings);
+            _state.Reload();
+        }
+        catch (ConfigException ex)
+        {
+            Error($"The setting was not saved.\n\n{ex.Message}");
+            return;
+        }
+        _nav.ApplySettings();
+        ShowConfigInfo();
+        Info("Game settings saved. They apply to the next round.");
+    }
+
+    private void OnManageCards(object sender, RoutedEventArgs e)
+    {
+        var dialog = new CardsEditDialog(_state) { Owner = Owner };
+        if (dialog.ShowDialog() != true) return;
+
+        try
+        {
+            _state.Reload();
+        }
+        catch (ConfigException ex)
+        {
+            Error($"The cards were saved, but could not be reloaded. The previous cards stay active.\n\n{ex.Message}");
+            return;
+        }
+        _nav.ApplySettings();
+        Refresh();
+        ShowConfigInfo();
+        Info("Cards saved. They apply to the next round.");
     }
 
     private void OnExport(object sender, RoutedEventArgs e)

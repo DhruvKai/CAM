@@ -10,6 +10,8 @@ public static class AppPaths
 
     public static string ResultsFile => Path.Combine(DataRoot, "results.jsonl");
 
+    public static string QuizResultsFile => Path.Combine(DataRoot, "quiz-results.jsonl");
+
     /// <summary>
     /// Editable config folder: a "Data" folder next to the exe so it is easy to find, or, when that location
     /// is read-only (e.g. Program Files), a "Data" folder under the per-user data root.

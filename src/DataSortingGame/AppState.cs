@@ -7,25 +7,29 @@ namespace DataSortingGame;
 /// <summary>Everything the screens share: loaded config and the results store.</summary>
 public sealed class AppState
 {
-    private AppState(string configDir, GameConfig config, ResultStore store)
+    private AppState(string configDir, GameConfig config, ResultStore store, QuizResultStore quizStore)
     {
         ConfigDir = configDir;
         Config = config;
         Store = store;
+        QuizStore = quizStore;
     }
 
     public string ConfigDir { get; }
     public GameConfig Config { get; private set; }
     public ResultStore Store { get; }
+    public QuizResultStore QuizStore { get; }
 
     public GameSettings Settings => Config.Settings;
     public IReadOnlyList<Category> Categories => Config.Categories;
+    public QuizSettings QuizSettings => Config.QuizSettings;
+    public IReadOnlyList<QuizQuestion> QuizQuestions => Config.QuizQuestions;
 
     /// <exception cref="ConfigException">A config file is unusable.</exception>
     public static AppState Create()
     {
         var dir = AppPaths.ResolveConfigDir(AppContext.BaseDirectory);
-        return new AppState(dir, ConfigLoader.Load(dir), new ResultStore(AppPaths.ResultsFile));
+        return new AppState(dir, ConfigLoader.Load(dir), new ResultStore(AppPaths.ResultsFile), new QuizResultStore(AppPaths.QuizResultsFile));
     }
 
     /// <summary>Re-reads the config files. On failure the previous config stays active and the exception is thrown.</summary>
@@ -38,6 +42,12 @@ public sealed class AppState
     /// <summary>Whether the next round for this name would count for the leaderboard.</summary>
     public bool NextRoundIsOfficial(string name) =>
         Settings.MaxOfficialAttempts == 0 || OfficialAttemptsUsed(name) < Settings.MaxOfficialAttempts;
+
+    public int OfficialQuizAttemptsUsed(string name) => QuizStore.CountOfficialAttempts(name);
+
+    /// <summary>Whether the next quiz round for this name would count for the quiz leaderboard.</summary>
+    public bool NextQuizRoundIsOfficial(string name) =>
+        QuizSettings.MaxOfficialAttempts == 0 || OfficialQuizAttemptsUsed(name) < QuizSettings.MaxOfficialAttempts;
 }
 
 public static class Ui

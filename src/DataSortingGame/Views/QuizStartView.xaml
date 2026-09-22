@@ -1,0 +1,48 @@
+<UserControl x:Class="DataSortingGame.Views.QuizStartView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Focusable="True">
+    <Grid Margin="60,34,60,26">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center">
+            <TextBlock x:Name="TitleText" FontSize="46" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center"/>
+            <TextBlock x:Name="Subtitle" FontSize="19" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0"
+                       HorizontalAlignment="Center" TextAlignment="Center"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Width="520" VerticalAlignment="Center" Margin="0,10,0,0">
+            <CheckBox x:Name="OpenQuizBox" Content="Open quiz - a group plays together, raising hands to answer (no name needed)"
+                      FontSize="15" Foreground="{StaticResource TextBrush}" Margin="2,0,0,16" Checked="OnOpenQuizChanged" Unchecked="OnOpenQuizChanged"/>
+
+            <StackPanel x:Name="NameFields">
+                <TextBlock Text="Your name" FontSize="15" Foreground="{StaticResource MutedBrush}" Margin="2,0,0,4"/>
+                <TextBox x:Name="NameBox" Style="{StaticResource FieldBox}" MaxLength="60"
+                         AutomationProperties.Name="Your name" TextChanged="OnNameChanged" KeyDown="OnFieldKeyDown"/>
+
+                <TextBlock Text="Employee code (optional)" FontSize="15" Foreground="{StaticResource MutedBrush}" Margin="2,14,0,4"/>
+                <TextBox x:Name="EcodeBox" Style="{StaticResource FieldBox}" MaxLength="60"
+                         AutomationProperties.Name="Employee code" KeyDown="OnFieldKeyDown"/>
+
+                <TextBlock x:Name="AttemptInfo" FontSize="15" Foreground="{StaticResource MutedBrush}" MinHeight="40"
+                           Margin="2,12,0,0" TextAlignment="Center" HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+                <Button x:Name="PlayButton" Content="Start quiz" Style="{StaticResource PrimaryButton}" Width="220"
+                        Click="OnPlay" IsEnabled="False"/>
+                <Button Content="Leaderboard" Margin="16,0,0,0" Width="180" Click="OnLeaderboard"/>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" HorizontalAlignment="Center">
+            <TextBlock Text="A timer runs on every question. Green / yellow / red picks how tricky the next one is."
+                       FontSize="15" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,10"/>
+            <Button Content="Back" Width="160" Click="OnBack"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -22,6 +22,7 @@ public partial class GameView : UserControl
     private readonly GameSession _session;
     private readonly string _name;
     private readonly string _department;
+    private readonly string _employeeCode;
     private readonly bool _official;
     private readonly IReadOnlyList<Category> _categories;
     private readonly Dictionary<string, Border> _boxes = [];
@@ -32,13 +33,14 @@ public partial class GameView : UserControl
     private bool _answered = true; // true until the first card is shown, so early input is ignored
     private bool _finished;
 
-    public GameView(AppState state, MainWindow nav, GameSession session, string name, string department, bool official)
+    public GameView(AppState state, MainWindow nav, GameSession session, string name, string department, string employeeCode, bool official)
     {
         _state = state;
         _nav = nav;
         _session = session;
         _name = name;
         _department = department;
+        _employeeCode = employeeCode;
         _official = official;
         _categories = state.Categories;
         InitializeComponent();
@@ -66,21 +68,18 @@ public partial class GameView : UserControl
             var cat = _categories[i];
             var header = new Border
             {
-                Background = Ui.Brush(cat.Color), CornerRadius = new CornerRadius(8, 8, 0, 0), Padding = new Thickness(14, 8, 14, 8),
+                Background = Ui.Brush(cat.Color), CornerRadius = new CornerRadius(8, 8, 0, 0), Padding = new Thickness(10, 10, 10, 10),
+                MinHeight = 58,
                 Child = new TextBlock
                 {
-                    Text = $"{i + 1}   {cat.Name}", FontSize = 22, FontWeight = FontWeights.Bold, Foreground = Ui.TextOn(cat.Color),
+                    Text = $"{i + 1}  {cat.Name}", FontSize = HeaderFontSize(cat.Name), FontWeight = FontWeights.Bold,
+                    Foreground = Ui.TextOn(cat.Color), TextWrapping = TextWrapping.Wrap, TextAlignment = TextAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center,
                 },
             };
-            var description = new TextBlock
-            {
-                Text = cat.Description, FontSize = 14, Foreground = Ui.Brush("#CBD5E1"), Margin = new Thickness(14, 10, 14, 8),
-            };
-
             var content = new DockPanel();
             DockPanel.SetDock(header, Dock.Top);
             content.Children.Add(header);
-            content.Children.Add(description);
 
             var box = new Border
             {
@@ -88,7 +87,7 @@ public partial class GameView : UserControl
                 Background = (Brush)FindResource("PanelBrush"), Margin = new Thickness(5, 0, 5, 0), AllowDrop = true,
                 Cursor = Cursors.Hand, Child = content, Tag = cat,
             };
-            AutomationProperties.SetName(box, $"{cat.Name}. {cat.Description}");
+            AutomationProperties.SetName(box, cat.Name);
 
             box.DragEnter += (_, e) => OnBoxDrag(box, cat, e, entering: true);
             box.DragOver += (_, e) => OnBoxDrag(box, cat, e, entering: true);
@@ -107,6 +106,14 @@ public partial class GameView : UserControl
             Boxes.Children.Add(box);
         }
     }
+
+    /// <summary>Longer category names (e.g. "Highly Restricted") get a smaller font so they fit the box header cleanly.</summary>
+    private static double HeaderFontSize(string name) => name.Length switch
+    {
+        <= 8 => 22,
+        <= 14 => 19,
+        _ => 17,
+    };
 
     private void OnBoxDrag(Border box, Category cat, DragEventArgs e, bool entering)
     {
@@ -186,7 +193,7 @@ public partial class GameView : UserControl
         _finished = true;
         _tick.Stop();
         _autoAdvance.Stop();
-        _nav.FinishRound(_session, _name, _department, _official);
+        _nav.FinishRound(_session, _name, _department, _employeeCode, _official);
     }
 
     private void OnTick()

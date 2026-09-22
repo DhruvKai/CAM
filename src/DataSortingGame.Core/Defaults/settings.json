@@ -1,6 +1,6 @@
 {
-  // Shown on the start screen. Keep it generic.
-  "eventTitle": "Data Sorting Game",
+  // Shown on the start screen.
+  "eventTitle": "CAM",
 
   "cardsPerRound": 15,
 
@@ -12,7 +12,7 @@
   "speedBonus": 2,
 
   // 0 = no time limit per card.
-  "secondsPerCard": 0,
+  "secondsPerCard": 45,
 
   // Attempts per name that count for the leaderboard. 0 = unlimited. Extra plays are practice.
   "maxOfficialAttempts": 1,

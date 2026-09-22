@@ -1,11 +1,12 @@
-# Data Sorting Game
+# CAM
 
 A standalone Windows game for security-awareness events. Players sort "data type" cards
-(email address, credit card number, ...) into classification boxes and see why each answer is right.
-Results are recorded per player and ranked on a leaderboard. Fully offline, no branding.
+(email address, credit card number, ...) into classification boxes and see why each answer is right,
+or play a multiple-choice quiz on data handling and classification. Results are recorded per player
+and ranked on a leaderboard. Fully offline.
 
 ## Set up the kiosk PC
-1. Copy `DataSortingGame.exe` to the kiosk PC (any folder you can write to, e.g. `C:\SortingGame`). Nothing needs installing.
+1. Copy `CAM.exe` to the kiosk PC (any folder you can write to, e.g. `C:\SortingGame`). Nothing needs installing.
 2. Double-click it. On first start it creates a `Data` folder next to the exe with three settings files.
 3. **Change the admin PIN** in `Data\settings.json` (default `1234`), then restart the game.
 
@@ -25,7 +26,7 @@ Edit the files in the `Data` folder, then use **Admin > Reload settings** (or re
 
 | File | What it controls |
 |---|---|
-| `categories.json` | The boxes: `id`, `name`, `description`, `color`. Between 2 and 6 categories. |
+| `categories.json` | The boxes: `id`, `name`, `color`. Between 2 and 6 categories. |
 | `cards.json` | The card pool: `id`, `label`, `example`, `categoryId`, `difficulty` (1 easy to 3 tricky), `explanation`. |
 | `settings.json` | Cards per round, scoring, time limit per card, attempts, difficulty mix, sounds, idle time, admin PIN. |
 
@@ -35,7 +36,9 @@ Edit the files in the `Data` folder, then use **Admin > Reload settings** (or re
 - Delete a settings file to restore its default.
 
 ## Where results are stored
-`%LocalAppData%\DataSortingGame\results.jsonl` on the kiosk PC. Back it up with **Export CSV** before clearing.
+`%LocalAppData%\DataSortingGame\results.jsonl` on the kiosk PC (quiz rounds: `quiz-results.jsonl` in the same
+folder). The folder is still named `DataSortingGame` internally so results from before the app was renamed to
+CAM keep working. Back it up with **Export CSV** before clearing.
 Reset between rehearsal and the real event with **Admin > Clear all results**.
 
 ## Build from source
@@ -44,5 +47,6 @@ Requires the .NET 10 SDK.
 dotnet test
 dotnet run --project src/DataSortingGame
 dotnet publish src/DataSortingGame -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
+# produces publish/CAM.exe
 ```
 See `agent.md` for the project layout and rules.

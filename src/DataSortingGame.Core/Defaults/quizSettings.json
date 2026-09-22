@@ -1,0 +1,19 @@
+{
+  // Shown on the quiz start screen.
+  "eventTitle": "CAM",
+
+  "questionsPerRound": 15,
+
+  "pointsPerCorrect": 10,
+  "streakThreshold": 3,
+  "streakBonus": 2,
+
+  // The quiz always has a per-question time limit. Minimum 5 seconds; it cannot be turned off.
+  "secondsPerQuestion": 20,
+
+  // Attempts per name that count for the leaderboard. 0 = unlimited. Extra plays are practice.
+  "maxOfficialAttempts": 1,
+
+  "showFeedback": true,
+  "soundEnabled": true
+}

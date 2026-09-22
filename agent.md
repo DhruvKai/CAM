@@ -1,4 +1,4 @@
-# agent.md — Data Sorting Game
+# agent.md — CAM
 
 Guide for AI agents (and humans) working on this repository.
 
@@ -8,11 +8,11 @@ A standalone Windows desktop game for a security-awareness event. Players are sh
 It replaces a physical card-and-box game. It runs on **one shared kiosk PC**; results are stored locally (no network, no server).
 
 ## Hard rules
-1. **No branding.** No company names, logos, product names or trademarks anywhere: code, UI, assets, file/exe metadata. The app title is the neutral "Data Sorting Game" (configurable via `eventTitle`).
+1. **App name is "CAM"** (exe, window title, assembly metadata; configurable per-event via `eventTitle`). Card/category *content* still stays free of real company names, logos or trademarks — the fake-data rule below is about game content, not the app's own branding.
 2. **Fake data only.** Cards show data *types* and obviously fake examples (e.g. the `4111 1111 1111 1111` test card number). Never put real personal data, real credentials or real company facts in cards.
 3. **Categories are not final.** Never hard-code category names, counts or colours in C#/XAML. They come from `categories.json` (2–6 categories supported). Card `categoryId` values must reference it.
 4. **Config is editable without a rebuild.** `cards.json`, `categories.json`, `settings.json` live in a `Data` folder next to the exe. Missing files are re-created from defaults embedded in `DataSortingGame.Core`.
-5. **Keep it a single self-contained exe** (no installer, no runtime prerequisite, no NuGet runtime dependencies unless there is a strong reason).
+5. **Keep it a single self-contained exe** (`CAM.exe`; no installer, no runtime prerequisite, no NuGet runtime dependencies unless there is a strong reason).
 
 ## Stack
 - C# / .NET 10, WPF (`net10.0-windows`) for the UI; plain `net10.0` class library for logic.
@@ -41,6 +41,7 @@ dotnet build
 dotnet test
 dotnet run --project src/DataSortingGame
 dotnet publish src/DataSortingGame -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
+# produces publish/CAM.exe
 ```
 
 ## Conventions

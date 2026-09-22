@@ -145,13 +145,13 @@ public class CsvExporterTests
     {
         var csv = CsvExporter.ToCsv([new PlayerResult
         {
-            PlayerName = "Sam", Department = "Ops", Score = 50, CorrectCount = 4, TotalCards = 5, TotalSeconds = 12.34,
+            PlayerName = "Sam", EmployeeCode = "E123", Department = "Ops", Score = 50, CorrectCount = 4, TotalCards = 5, TotalSeconds = 12.34,
             Answers = [new CardAnswer { CardLabel = "Passwords", Correct = false }, new CardAnswer { CardLabel = "Ads", Correct = true }],
         }]);
         var lines = csv.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
         Assert.Equal(2, lines.Length);
-        Assert.StartsWith("Name,Department", lines[0]);
-        Assert.StartsWith("Sam,Ops,Yes,50,4,5,12.3,", lines[1]);
+        Assert.StartsWith("Name,Employee code", lines[0]);
+        Assert.StartsWith("Sam,E123,Ops,Yes,50,4,5,12.3,", lines[1]);
         Assert.EndsWith(",Passwords", lines[1]);
     }
 
