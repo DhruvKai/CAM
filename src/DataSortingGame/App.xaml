@@ -72,7 +72,7 @@
                                 BorderThickness="2" BorderBrush="{StaticResource PanelBorderBrush}"
                                 Padding="{TemplateBinding Padding}">
                             <ScrollViewer x:Name="PART_ContentHost" Focusable="False"
-                                          HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
+                                          HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsKeyboardFocused" Value="True">
