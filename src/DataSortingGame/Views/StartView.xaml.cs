@@ -18,13 +18,19 @@ public partial class StartView : UserControl
 
         var s = state.Settings;
         TitleText.Text = s.EventTitle;
-        Subtitle.Text = "Sort each piece of data into the right box. Learn why as you go.";
+        Subtitle.Text = "Read each scenario and sort it into the right classification. Learn why as you go.";
         HowTo.Text = $"{Math.Min(s.CardsPerRound, state.Config.Cards.Count)} cards per round. Drag a card into a box, click a box, or press its number key.";
+        QuizButton.Content = $"Play {state.QuizSettings.EventTitle} instead";
 
         Legend.Columns = state.Categories.Count;
         for (var i = 0; i < state.Categories.Count; i++)
             Legend.Children.Add(BuildLegendItem(state.Categories[i], i));
 
+        if (!HasCards)
+        {
+            AttemptInfo.Text = NoCardsText;
+            HowTo.Text = "";
+        }
         Loaded += (_, _) => NameBox.Focus();
     }
 
@@ -43,12 +49,16 @@ public partial class StartView : UserControl
         };
     }
 
+    private bool HasCards => _state.Config.Cards.Count > 0;
+
     private void OnNameChanged(object sender, TextChangedEventArgs e)
     {
         var name = PlayerName.Normalize(NameBox.Text);
-        PlayButton.IsEnabled = name.Length > 0;
-        AttemptInfo.Text = name.Length == 0 ? "" : DescribeAttempt(name);
+        PlayButton.IsEnabled = name.Length > 0 && HasCards;
+        AttemptInfo.Text = !HasCards ? NoCardsText : name.Length == 0 ? "" : DescribeAttempt(name);
     }
+
+    private const string NoCardsText = @"No cards are loaded yet. Ask the organiser to add some (Admin > Manage cards, or Data\cards.json).";
 
     private string DescribeAttempt(string name)
     {
@@ -76,7 +86,7 @@ public partial class StartView : UserControl
     private void OnPlay(object sender, RoutedEventArgs e)
     {
         var name = PlayerName.Normalize(NameBox.Text);
-        if (name.Length == 0)
+        if (name.Length == 0 || !HasCards)
         {
             NameBox.Focus();
             return;

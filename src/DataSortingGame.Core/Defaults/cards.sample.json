@@ -1,0 +1,32 @@
+[
+  {
+    "id": "pub-001",
+    "scenario": "A press release announcing a new regional office, already published on the company website.",
+    "categoryId": "public",
+    "why": "It has been approved and released for anyone to read, so sharing it causes no harm."
+  },
+  {
+    "id": "int-001",
+    "scenario": "The internal phone directory listing colleague names and desk extensions.",
+    "categoryId": "internal",
+    "why": "It is meant for colleagues only. Outsiders could use it to target staff, but disclosure causes limited harm."
+  },
+  {
+    "id": "con-001",
+    "scenario": "A signed client contract showing negotiated pricing, service levels and renewal dates.",
+    "categoryId": "confidential",
+    "why": "Contracts carry confidentiality obligations. A leak could breach them and damage the client relationship."
+  },
+  {
+    "id": "hr-001",
+    "scenario": "A completed background-screening report for a job applicant.",
+    "categoryId": "restricted",
+    "why": "The report contains highly sensitive personal and potentially legal data about an identifiable individual."
+  },
+  {
+    "id": "hr-002",
+    "scenario": "A file containing emergency access retrieval steps and admin credentials.",
+    "categoryId": "restricted",
+    "why": "Authentication credentials could directly enable unauthorized privileged access and require the highest protection."
+  }
+]

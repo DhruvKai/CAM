@@ -26,6 +26,7 @@ public partial class LeaderboardView : UserControl
         _nav = nav;
         IsAttract = attract;
         InitializeComponent();
+        TitleText.Text = $"{state.Settings.EventTitle} leaderboard";
 
         IReadOnlyList<LeaderboardEntry> board;
         try { board = Leaderboard.Rank(state.Store.LoadAll()); }

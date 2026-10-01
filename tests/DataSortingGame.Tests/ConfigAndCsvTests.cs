@@ -7,38 +7,55 @@ public class DefaultConfigTests
 {
     private static readonly GameConfig Config = ConfigLoader.LoadDefaults();
 
+    private static GameConfig LoadSamples() => ConfigLoader.Parse(
+        ConfigLoader.ReadDefault("categories.json"), ConfigLoader.ReadDefault(ConfigLoader.CardsSampleFileName), "{}",
+        ConfigLoader.ReadDefault(ConfigLoader.QuizQuestionsSampleFileName));
+
     [Fact]
     public void Shipped_defaults_load_with_no_warnings() => Assert.Empty(Config.Warnings);
 
     [Fact]
-    public void Shipped_pool_is_big_enough_for_random_rounds()
+    public void Shipped_cards_and_questions_are_blank_for_the_organiser_to_fill()
     {
-        Assert.True(Config.Cards.Count >= 60);
-        Assert.Equal(4, Config.Categories.Count);
+        Assert.Empty(Config.Cards);
+        Assert.Empty(Config.QuizQuestions);
     }
 
     [Fact]
-    public void Every_category_has_a_healthy_number_of_cards()
+    public void Shipped_categories_are_the_four_classifications() =>
+        Assert.Equal(["Public", "Internal", "Confidential", "Highly Restricted"], Config.Categories.Select(c => c.Name));
+
+    [Fact]
+    public void Games_are_named_label_legends_and_cyber_trivia()
     {
-        foreach (var cat in Config.Categories)
-            Assert.True(Config.Cards.Count(c => c.CategoryId == cat.Id) >= 10, cat.Id);
+        Assert.Equal("Label Legends", Config.Settings.EventTitle);
+        Assert.Equal("Cyber Trivia", Config.QuizSettings.EventTitle);
     }
 
     [Fact]
-    public void Every_card_has_an_explanation_and_example()
+    public void Card_sample_is_valid_and_covers_every_category()
     {
-        foreach (var c in Config.Cards)
-        {
-            Assert.False(string.IsNullOrWhiteSpace(c.Explanation), c.Id);
-            Assert.False(string.IsNullOrWhiteSpace(c.Example), c.Id);
-        }
+        var cfg = LoadSamples();
+        Assert.Empty(cfg.Warnings);
+        foreach (var cat in cfg.Categories)
+            Assert.Contains(cfg.Cards, c => c.CategoryId == cat.Id);
+        Assert.All(cfg.Cards, c => Assert.False(string.IsNullOrWhiteSpace(c.Why), c.Id));
+    }
+
+    [Fact]
+    public void Quiz_sample_is_valid_and_covers_every_difficulty()
+    {
+        var cfg = LoadSamples();
+        Assert.Empty(cfg.Warnings);
+        Assert.Equal([1, 2, 3], cfg.QuizQuestions.Select(q => q.Difficulty).Distinct().Order());
     }
 
     [Fact]
     public void Shipped_content_has_no_brand_or_real_looking_secrets()
     {
         var all = string.Join(' ', ConfigLoader.ReadDefault("cards.json"), ConfigLoader.ReadDefault("categories.json"),
-            ConfigLoader.ReadDefault("settings.json"));
+            ConfigLoader.ReadDefault("settings.json"), ConfigLoader.ReadDefault(ConfigLoader.CardsSampleFileName),
+            ConfigLoader.ReadDefault(ConfigLoader.QuizQuestionsSampleFileName));
         foreach (var banned in new[] { "microsoft", "google", "amazon", "aws", "apple", "gmail", "acme" })
             Assert.DoesNotMatch($@"\b{banned}\b", all.ToLowerInvariant());
     }
@@ -47,15 +64,18 @@ public class DefaultConfigTests
 public class ConfigLoaderTests
 {
     private const string Cats = """[{"id":"a","name":"A","color":"#112233"},{"id":"b","name":"B","color":"#445566"}]""";
-    private const string OneCard = """[{"id":"c1","label":"L","categoryId":"a","difficulty":2}]""";
+    private const string OneCard = """[{"id":"c1","scenario":"S","categoryId":"a","why":"W"}]""";
 
     [Fact]
     public void Missing_files_are_recreated_from_defaults()
     {
         using var dir = new TempDir();
-        var cfg = ConfigLoader.Load(Path.Combine(dir.Path, "Data"));
-        Assert.NotEmpty(cfg.Cards);
-        Assert.True(File.Exists(Path.Combine(dir.Path, "Data", "cards.json")));
+        var data = Path.Combine(dir.Path, "Data");
+        var cfg = ConfigLoader.Load(data);
+        Assert.Empty(cfg.Cards);
+        Assert.True(File.Exists(Path.Combine(data, "cards.json")));
+        Assert.True(File.Exists(Path.Combine(data, ConfigLoader.CardsSampleFileName)));
+        Assert.True(File.Exists(Path.Combine(data, ConfigLoader.QuizQuestionsSampleFileName)));
     }
 
     [Fact]
@@ -79,12 +99,37 @@ public class ConfigLoaderTests
     }
 
     [Fact]
+    public void Card_fields_are_read()
+    {
+        var card = Assert.Single(ConfigLoader.Parse(Cats, OneCard, "{}").Cards);
+        Assert.Equal(("c1", "S", "a", "W"), (card.Id, card.Scenario, card.CategoryId, card.Why));
+    }
+
+    [Fact]
+    public void Category_can_be_given_by_its_name()
+    {
+        var cfg = ConfigLoader.Parse(
+            """[{"id":"restricted","name":"Highly Restricted"},{"id":"public","name":"Public"}]""",
+            """[{"id":"x","scenario":"S","categoryId":"Highly Restricted"},{"id":"y","scenario":"S","categoryId":"PUBLIC"}]""", "{}");
+        Assert.Empty(cfg.Warnings);
+        Assert.Equal(["restricted", "public"], cfg.Cards.Select(c => c.CategoryId));
+    }
+
+    [Fact]
     public void Unknown_category_card_is_skipped_with_a_warning()
     {
         var cfg = ConfigLoader.Parse(Cats,
-            """[{"id":"ok","label":"L","categoryId":"a"},{"id":"bad","label":"L","categoryId":"zzz"}]""", "{}");
+            """[{"id":"ok","scenario":"S","categoryId":"a"},{"id":"bad","scenario":"S","categoryId":"zzz"}]""", "{}");
         Assert.Single(cfg.Cards);
         Assert.Contains(cfg.Warnings, w => w.Contains("bad") && w.Contains("zzz"));
+    }
+
+    [Fact]
+    public void Card_without_a_scenario_is_skipped_with_a_warning()
+    {
+        var cfg = ConfigLoader.Parse(Cats, """[{"id":"old","label":"Old format","categoryId":"a"}]""", "{}");
+        Assert.Empty(cfg.Cards);
+        Assert.Contains(cfg.Warnings, w => w.Contains("old"));
     }
 
     [Fact]
@@ -92,7 +137,7 @@ public class ConfigLoaderTests
     {
         var cfg = ConfigLoader.Parse(
             """[{"id":"a","name":"A","color":"red"},{"id":"b","name":"B"},{"id":"a","name":"Dup"}]""",
-            """[{"id":"x","label":"L","categoryId":"a"},{"id":"x","label":"L2","categoryId":"a"}]""", "{}");
+            """[{"id":"x","scenario":"S","categoryId":"a"},{"id":"x","scenario":"S2","categoryId":"a"}]""", "{}");
         Assert.Equal(2, cfg.Categories.Count);
         Assert.Equal(3, cfg.Warnings.Count); // bad colour, duplicate category, duplicate card
     }
@@ -104,8 +149,8 @@ public class ConfigLoaderTests
         Assert.Throws<ConfigException>(() => ConfigLoader.Parse(cats, OneCard, "{}"));
 
     [Fact]
-    public void No_valid_cards_throws() =>
-        Assert.Throws<ConfigException>(() => ConfigLoader.Parse(Cats, "[]", "{}"));
+    public void Empty_card_list_is_allowed() =>
+        Assert.Empty(ConfigLoader.Parse(Cats, "[]", "{}").Cards);
 
     [Fact]
     public void Invalid_json_error_names_the_file()
@@ -118,11 +163,32 @@ public class ConfigLoaderTests
     public void Bad_settings_fall_back_to_safe_values()
     {
         var cfg = ConfigLoader.Parse(Cats, OneCard,
-            """{"cardsPerRound":0,"difficultyMix":[0,0,0],"adminPin":"","secondsPerCard":-4}""");
+            """{"cardsPerRound":0,"adminPin":"","secondsPerCard":-4,"eventTitle":" "}""");
         Assert.Equal(15, cfg.Settings.CardsPerRound);
-        Assert.Equal(GameEngine.DefaultMix, cfg.Settings.DifficultyMix);
         Assert.Equal("1234", cfg.Settings.AdminPin);
         Assert.Equal(0, cfg.Settings.SecondsPerCard);
+        Assert.Equal("Label Legends", cfg.Settings.EventTitle);
+    }
+
+    [Theory]
+    [InlineData("""["Only one"]""", 0)]
+    [InlineData("""["A","B","C","D","E"]""", 0)]
+    [InlineData("""["A",""]""", 0)]
+    [InlineData("""["True","False"]""", 2)]
+    public void Invalid_quiz_questions_are_skipped_with_a_warning(string options, int correctIndex)
+    {
+        var json = $$"""[{"id":"q","text":"T","options":{{options}},"correctIndex":{{correctIndex}}}]""";
+        var cfg = ConfigLoader.Parse(Cats, OneCard, "{}", json);
+        Assert.Empty(cfg.QuizQuestions);
+        Assert.Contains(cfg.Warnings, w => w.Contains("'q'"));
+    }
+
+    [Fact]
+    public void Two_option_quiz_question_is_accepted()
+    {
+        var cfg = ConfigLoader.Parse(Cats, OneCard, "{}",
+            """[{"id":"tf","text":"True or false?","options":["True","False"],"correctIndex":1,"difficulty":3}]""");
+        Assert.Equal(1, Assert.Single(cfg.QuizQuestions).CorrectIndex);
     }
 }
 

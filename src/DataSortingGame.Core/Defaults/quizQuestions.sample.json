@@ -1,0 +1,52 @@
+[
+  {
+    "id": "q001",
+    "text": "What does 'PII' stand for?",
+    "options": [
+      "Personally Identifiable Information",
+      "Public Internal Information",
+      "Personal Internet Identity",
+      "Protected Internal Index"
+    ],
+    "correctIndex": 0,
+    "difficulty": 1,
+    "explanation": "PII is any information that can identify a specific person, such as a name, address or ID number."
+  },
+  {
+    "id": "q002",
+    "text": "You find a USB drive in the car park at work. What should you do?",
+    "options": [
+      "Plug it into your work computer to see who owns it",
+      "Take it home",
+      "Hand it to IT or security without plugging it in",
+      "Give it to a colleague"
+    ],
+    "correctIndex": 2,
+    "difficulty": 1,
+    "explanation": "Unknown USB drives can carry malware. Let IT or security inspect it safely."
+  },
+  {
+    "id": "q003",
+    "text": "What is the main difference between Internal and Confidential data?",
+    "options": [
+      "There is no difference",
+      "Internal data may be shared outside the company; Confidential may not",
+      "Both stay inside the company, but leaking Confidential data causes real harm, so it needs stronger controls",
+      "Confidential data is less sensitive than Internal data"
+    ],
+    "correctIndex": 2,
+    "difficulty": 2,
+    "explanation": "Both are for internal use, but Confidential data causes real harm if it leaks, so access is limited further."
+  },
+  {
+    "id": "q004",
+    "text": "True or false: a quick format of a hard drive permanently erases the data on it.",
+    "options": [
+      "True",
+      "False"
+    ],
+    "correctIndex": 1,
+    "difficulty": 3,
+    "explanation": "A quick format only removes the file index. The data can often be recovered, so drives must be securely wiped or destroyed."
+  }
+]

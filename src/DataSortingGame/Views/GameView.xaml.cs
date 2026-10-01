@@ -115,6 +115,16 @@ public partial class GameView : UserControl
         _ => 17,
     };
 
+    /// <summary>Short scenarios read big; longer ones step down so a few sentences still fit the card.</summary>
+    private static double ScenarioFontSize(string scenario) => scenario.Length switch
+    {
+        <= 50 => 34,
+        <= 90 => 30,
+        <= 140 => 27,
+        <= 220 => 24,
+        _ => 21,
+    };
+
     private void OnBoxDrag(Border box, Category cat, DragEventArgs e, bool entering)
     {
         var accept = !_answered && e.Data.GetDataPresent(DragFormat);
@@ -134,8 +144,9 @@ public partial class GameView : UserControl
 
         _autoAdvance.Stop();
         _answered = false;
-        CardLabel.Text = card.Label;
-        CardExample.Text = card.Example;
+        CardScenario.Text = card.Scenario;
+        CardScenario.FontSize = ScenarioFontSize(card.Scenario);
+        CardScenario.LineHeight = CardScenario.FontSize * 1.3;
         CardBorder.Opacity = 1;
         ProgressText.Text = $"Card {_session.Answered + 1} of {_session.Total}";
         ProgressBar.Value = _session.Answered;

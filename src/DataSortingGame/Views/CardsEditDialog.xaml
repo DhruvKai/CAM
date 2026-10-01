@@ -75,7 +75,8 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Border Width="10" Height="10" CornerRadius="5" Margin="0,2,8,0"
                                                 Background="{Binding ColorBrush}" VerticalAlignment="Top"/>
-                                        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="14" TextWrapping="Wrap"/>
+                                        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="13.5" TextWrapping="Wrap"
+                                                   MaxHeight="56" TextTrimming="WordEllipsis" Width="262"/>
                                     </StackPanel>
                                     <TextBlock Text="{Binding Summary}" FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="18,2,0,0"/>
                                 </StackPanel>
@@ -116,44 +117,20 @@
                             <TextBlock Text="Unique, no spaces. Used internally, never shown to players."
                                        FontSize="11" Foreground="{StaticResource MutedBrush}" Margin="0,4,0,18"/>
 
-                            <TextBlock Text="LABEL (shown on the card)" FontSize="11" FontWeight="Bold"
+                            <TextBlock Text="SCENARIO (shown on the card)" FontSize="11" FontWeight="Bold"
                                        Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
-                            <TextBox x:Name="LabelBox" Style="{StaticResource FieldBox}" FontSize="18" Padding="10,8"
-                                     Margin="0,0,0,18" LostFocus="OnFieldLostFocus"/>
+                            <TextBox x:Name="ScenarioBox" Style="{StaticResource FieldBox}" FontSize="16" Padding="10,8"
+                                     AcceptsReturn="False" TextWrapping="Wrap" Height="96"
+                                     VerticalScrollBarVisibility="Auto" Margin="0,0,0,18" LostFocus="OnFieldLostFocus"/>
 
-                            <TextBlock Text="EXAMPLE (fake sample value shown under the label)" FontSize="11" FontWeight="Bold"
+                            <TextBlock Text="CLASSIFICATION" FontSize="11" FontWeight="Bold" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
+                            <ComboBox x:Name="CategoryCombo" FontSize="15" Padding="10,8" Height="40" Width="320" HorizontalAlignment="Left"
+                                      Margin="0,0,0,18" DisplayMemberPath="Name" SelectedValuePath="Id" SelectionChanged="OnCategoryChanged"/>
+
+                            <TextBlock Text="WHY (shown after the player answers)" FontSize="11" FontWeight="Bold"
                                        Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
-                            <TextBox x:Name="ExampleBox" Style="{StaticResource FieldBox}" FontSize="15" Padding="10,8"
-                                     Margin="0,0,0,18" LostFocus="OnFieldLostFocus"/>
-
-                            <Grid Margin="0,0,0,18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="24"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="CATEGORY" FontSize="11" FontWeight="Bold" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
-                                    <ComboBox x:Name="CategoryCombo" FontSize="15" Padding="10,8" Height="40"
-                                              DisplayMemberPath="Name" SelectedValuePath="Id" SelectionChanged="OnCategoryChanged"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="DIFFICULTY" FontSize="11" FontWeight="Bold" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Height="40">
-                                        <RadioButton x:Name="EasyRadio" GroupName="CardDifficulty" Content="Easy" FontSize="14"
-                                                     VerticalAlignment="Center" Margin="0,0,18,0" Checked="OnDifficultyChanged"/>
-                                        <RadioButton x:Name="MediumRadio" GroupName="CardDifficulty" Content="Medium" FontSize="14"
-                                                     VerticalAlignment="Center" Margin="0,0,18,0" Checked="OnDifficultyChanged"/>
-                                        <RadioButton x:Name="TrickyRadio" GroupName="CardDifficulty" Content="Tricky" FontSize="14"
-                                                     VerticalAlignment="Center" Checked="OnDifficultyChanged"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Grid>
-
-                            <TextBlock Text="EXPLANATION (shown after the player answers)" FontSize="11" FontWeight="Bold"
-                                       Foreground="{StaticResource MutedBrush}" Margin="0,0,0,4"/>
-                            <TextBox x:Name="ExplanationBox" Style="{StaticResource FieldBox}" FontSize="15" Padding="10,8"
-                                     AcceptsReturn="True" TextWrapping="Wrap" Height="150"
+                            <TextBox x:Name="WhyBox" Style="{StaticResource FieldBox}" FontSize="15" Padding="10,8"
+                                     AcceptsReturn="False" TextWrapping="Wrap" Height="120"
                                      VerticalScrollBarVisibility="Auto" LostFocus="OnFieldLostFocus"/>
                         </StackPanel>
                     </ScrollViewer>

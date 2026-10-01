@@ -29,7 +29,7 @@ public partial class QuizQuestionsEditDialog : Window
         Difficulty = q.Difficulty, Explanation = q.Explanation,
     };
 
-    /// <summary>The editor always shows exactly 4 option boxes, so every question needs exactly 4 entries.</summary>
+    /// <summary>The editor always shows 4 option boxes; shorter option lists are padded with blanks for display.</summary>
     private static List<string> Pad(List<string> options)
     {
         var padded = options.Take(4).ToList();
@@ -180,6 +180,8 @@ public partial class QuizQuestionsEditDialog : Window
             q.Id = q.Id.Trim();
             q.Text = q.Text.Trim();
             q.Options = q.Options.Select(o => (o ?? "").Trim()).ToList();
+            // Blank trailing boxes (C, D) just mean fewer options, e.g. a True/False question.
+            while (q.Options.Count > 0 && q.Options[^1].Length == 0) q.Options.RemoveAt(q.Options.Count - 1);
             q.Explanation = (q.Explanation ?? "").Trim();
             q.Difficulty = Math.Clamp(q.Difficulty, 1, 3);
 
@@ -189,13 +191,11 @@ public partial class QuizQuestionsEditDialog : Window
             else if (!seenIds.Add(q.Id))
                 errors.Add($"'{q.Id}': duplicate id.");
 
-            if (q.Options.Count(o => o.Length == 0) > 0)
-                errors.Add($"'{name}': all 4 options must have text.");
-            if (q.CorrectIndex < 0 || q.CorrectIndex >= q.Options.Count)
-                errors.Add($"'{name}': pick which option is correct.");
+            if (q.Options.Count < 2 || q.Options.Any(o => o.Length == 0))
+                errors.Add($"'{name}': fill in at least options A and B, without gaps (C and D may be left blank).");
+            else if (q.CorrectIndex < 0 || q.CorrectIndex >= q.Options.Count)
+                errors.Add($"'{name}': the correct answer must be one of the filled-in options.");
         }
-
-        if (_questions.Count == 0) errors.Add("Add at least one question.");
 
         if (errors.Count > 0)
         {

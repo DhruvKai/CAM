@@ -80,7 +80,7 @@
             <ScrollViewer Grid.Column="1" Margin="16,0,0,0" VerticalScrollBarVisibility="Auto" Focusable="False">
                 <StackPanel>
                     <TextBlock Text="Most missed cards" FontSize="17" FontWeight="SemiBold"/>
-                    <TextBlock x:Name="MissedText" FontSize="13.5" Foreground="#CBD5E1" Margin="0,4,0,16"/>
+                    <TextBlock x:Name="MissedText" FontSize="13.5" Foreground="#CBD5E1" Margin="0,4,0,16" TextWrapping="Wrap"/>
 
                     <TextBlock Text="Settings warnings" FontSize="17" FontWeight="SemiBold"/>
                     <TextBlock x:Name="WarningText" FontSize="13.5" Foreground="{StaticResource WarnBrush}" Margin="0,4,0,16"/>

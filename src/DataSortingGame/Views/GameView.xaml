@@ -44,8 +44,10 @@
                      Visibility="Hidden"/>
 
         <!-- Card + feedback -->
-        <StackPanel Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,24,0,0">
-            <Border x:Name="CardBorder" Width="580" MinHeight="200" Background="White" CornerRadius="20" Padding="30,26"
+        <StackPanel Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,18,0,0">
+            <!-- Scenarios run to a few sentences: the card has a fixed size, the font steps down with length
+                 (see ScenarioFontSize), and the Viewbox shrinks anything that still doesn't fit. -->
+            <Border x:Name="CardBorder" Width="960" Height="190" Background="White" CornerRadius="20" Padding="36,18"
                     Cursor="SizeAll" RenderTransformOrigin="0.5,0.5"
                     MouseLeftButtonDown="OnCardMouseDown" MouseMove="OnCardMouseMove">
                 <Border.RenderTransform>
@@ -54,16 +56,16 @@
                 <Border.Effect>
                     <DropShadowEffect BlurRadius="28" ShadowDepth="6" Opacity="0.45" Color="Black"/>
                 </Border.Effect>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock x:Name="CardLabel" FontSize="34" FontWeight="Bold" Foreground="#0F172A" TextAlignment="Center"/>
-                    <TextBlock x:Name="CardExample" FontSize="18" FontStyle="Italic" Foreground="#475569" TextAlignment="Center" Margin="0,10,0,0"/>
-                </StackPanel>
+                <Viewbox Stretch="Uniform" StretchDirection="DownOnly" VerticalAlignment="Center">
+                    <TextBlock x:Name="CardScenario" Width="888" FontWeight="SemiBold" Foreground="#0F172A"
+                               TextAlignment="Center" TextWrapping="Wrap" LineStackingStrategy="BlockLineHeight"/>
+                </Viewbox>
             </Border>
 
             <TextBlock x:Name="DragHint" Text="Drag the card into a box, click a box, or press its number key"
                        FontSize="16" Foreground="{StaticResource MutedBrush}" HorizontalAlignment="Center" Margin="0,16,0,0" Height="60"/>
 
-            <Border x:Name="FeedbackPanel" Visibility="Collapsed" Width="920" Margin="0,14,0,0" Padding="20,12"
+            <Border x:Name="FeedbackPanel" Visibility="Collapsed" Width="1040" Margin="0,12,0,0" Padding="20,10"
                     Background="{StaticResource PanelBrush}" CornerRadius="14" BorderThickness="3" MinHeight="60">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -72,7 +74,8 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock x:Name="FeedbackTitle" FontSize="22" FontWeight="Bold"/>
-                        <TextBlock x:Name="FeedbackBody" FontSize="16" Margin="0,4,0,0" Foreground="#CBD5E1"/>
+                        <TextBlock x:Name="FeedbackBody" FontSize="16.5" Margin="0,4,0,0" Foreground="#CBD5E1"
+                                   TextWrapping="Wrap" TextTrimming="WordEllipsis" MaxHeight="92"/>
                     </StackPanel>
                     <Button x:Name="NextButton" Grid.Column="1" Style="{StaticResource PrimaryButton}" FontSize="18" Padding="24,10"
                             Margin="24,0,0,0" VerticalAlignment="Center" Click="OnNext"/>
@@ -81,6 +84,6 @@
         </StackPanel>
 
         <!-- Category boxes -->
-        <UniformGrid x:Name="Boxes" Grid.Row="3" Rows="1" Height="212" Margin="0,8,0,0"/>
+        <UniformGrid x:Name="Boxes" Grid.Row="3" Rows="1" Height="170" Margin="0,8,0,0"/>
     </Grid>
 </UserControl>

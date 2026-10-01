@@ -10,7 +10,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Quiz leaderboard" FontSize="42" FontWeight="Bold" HorizontalAlignment="Center"/>
+        <TextBlock x:Name="TitleText" Text="Quiz leaderboard" FontSize="42" FontWeight="Bold" HorizontalAlignment="Center"/>
 
         <Grid Grid.Row="1" Margin="16,18,26,6">
             <Grid.ColumnDefinitions>

@@ -19,22 +19,28 @@ public partial class QuizStartView : UserControl
         TitleText.Text = state.QuizSettings.EventTitle;
         Subtitle.Text = "Multiple choice questions on data handling and classification.";
 
+        if (!HasQuestions) AttemptInfo.Text = NoQuestionsText;
         Loaded += (_, _) => NameBox.Focus();
     }
+
+    private bool HasQuestions => _state.QuizQuestions.Count > 0;
+
+    private const string NoQuestionsText =
+        @"No questions are loaded yet. Ask the organiser to add some (Admin > Manage quiz questions, or Data\quizQuestions.json).";
 
     private void OnOpenQuizChanged(object sender, RoutedEventArgs e)
     {
         var open = OpenQuizBox.IsChecked == true;
         NameFields.Visibility = open ? Visibility.Collapsed : Visibility.Visible;
         PlayButton.Content = open ? "Start open quiz" : "Start quiz";
-        PlayButton.IsEnabled = open || PlayerName.Normalize(NameBox.Text).Length > 0;
+        PlayButton.IsEnabled = HasQuestions && (open || PlayerName.Normalize(NameBox.Text).Length > 0);
     }
 
     private void OnNameChanged(object sender, TextChangedEventArgs e)
     {
         var name = PlayerName.Normalize(NameBox.Text);
-        PlayButton.IsEnabled = name.Length > 0;
-        AttemptInfo.Text = name.Length == 0 ? "" : DescribeAttempt(name);
+        PlayButton.IsEnabled = name.Length > 0 && HasQuestions;
+        AttemptInfo.Text = !HasQuestions ? NoQuestionsText : name.Length == 0 ? "" : DescribeAttempt(name);
     }
 
     private string DescribeAttempt(string name)
@@ -61,6 +67,7 @@ public partial class QuizStartView : UserControl
 
     private void OnPlay(object sender, RoutedEventArgs e)
     {
+        if (!HasQuestions) return;
         if (OpenQuizBox.IsChecked == true)
         {
             _nav.StartOpenQuiz();

@@ -8,7 +8,7 @@ public class GameSessionTests
     private static GameSession NewSession(int cards = 5, GameSettings? settings = null) =>
         new(Enumerable.Range(1, cards).Select(i => new Card
         {
-            Id = $"c{i}", Label = $"Card {i}", CategoryId = "right", Explanation = $"why {i}",
+            Id = $"c{i}", Scenario = $"Card {i}", CategoryId = "right", Why = $"why {i}",
         }).ToList(), settings ?? new GameSettings());
 
     [Fact]

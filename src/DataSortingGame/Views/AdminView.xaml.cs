@@ -47,7 +47,7 @@ public partial class AdminView : UserControl
         var missed = ResultStats.MostMissed(all);
         MissedText.Text = missed.Count == 0
             ? "Not enough data yet."
-            : string.Join("\n", missed.Select(m => $"{m.CardLabel}: {m.MissPercent:0}% missed ({m.Misses}/{m.Attempts})"));
+            : string.Join("\n\n", missed.Select(m => $"{m.MissPercent:0}% missed ({m.Misses}/{m.Attempts}): {m.CardLabel}"));
     }
 
     private void ShowConfigInfo()

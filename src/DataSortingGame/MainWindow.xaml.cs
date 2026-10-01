@@ -63,8 +63,9 @@ public partial class MainWindow : Window
 
     public void StartGame(string name, string department, string employeeCode)
     {
+        if (_state.Config.Cards.Count == 0) return; // the start screen explains that no cards are loaded yet
         var official = _state.NextRoundIsOfficial(name);
-        var cards = GameEngine.DrawCards(_state.Config.Cards, _state.Settings.CardsPerRound, _state.Settings.DifficultyMix);
+        var cards = GameEngine.DrawCards(_state.Config.Cards, _state.Settings.CardsPerRound);
         var session = new GameSession(cards, _state.Settings);
         Navigate(new GameView(_state, this, session, name, department, employeeCode, official));
     }

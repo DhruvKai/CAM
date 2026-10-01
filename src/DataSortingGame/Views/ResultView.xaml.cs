@@ -62,7 +62,7 @@ public partial class ResultView : UserControl
 
     private void BuildReview(AppState state, PlayerResult result)
     {
-        var explanations = state.Config.Cards.ToDictionary(c => c.Id, c => c.Explanation);
+        var explanations = state.Config.Cards.ToDictionary(c => c.Id, c => c.Why);
         var wrong = result.Answers.Where(a => !a.Correct).ToList();
 
         if (wrong.Count == 0)
@@ -81,10 +81,10 @@ public partial class ResultView : UserControl
             line.Children.Add(Chip(state, a.CorrectCategoryId, a.CorrectCategoryId));
 
             var body = new StackPanel();
-            body.Children.Add(new TextBlock { Text = a.CardLabel, FontSize = 18, FontWeight = FontWeights.SemiBold });
+            body.Children.Add(new TextBlock { Text = a.CardLabel, FontSize = 17, FontWeight = FontWeights.SemiBold, TextWrapping = TextWrapping.Wrap });
             body.Children.Add(line);
             if (explanations.TryGetValue(a.CardId, out var why) && why.Length > 0)
-                body.Children.Add(new TextBlock { Text = why, FontSize = 14, Foreground = Ui.Brush("#CBD5E1"), Margin = new Thickness(0, 6, 0, 0) });
+                body.Children.Add(new TextBlock { Text = why, FontSize = 14, Foreground = Ui.Brush("#CBD5E1"), Margin = new Thickness(0, 6, 0, 0), TextWrapping = TextWrapping.Wrap });
 
             ReviewList.Children.Add(new Border
             {

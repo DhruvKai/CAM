@@ -9,23 +9,21 @@ public sealed class Category
     public string Color { get; set; } = "#607D8B";
 }
 
-/// <summary>A data-type card the player must classify. Loaded from cards.json.</summary>
+/// <summary>A scenario card the player must classify. Loaded from cards.json.</summary>
 public sealed class Card
 {
     public string Id { get; set; } = "";
-    public string Label { get; set; } = "";
-    /// <summary>Obviously fake sample value or short context, shown under the label.</summary>
-    public string Example { get; set; } = "";
+    /// <summary>The situation shown to the player, e.g. "A draft acquisition announcement before public release."</summary>
+    public string Scenario { get; set; } = "";
     public string CategoryId { get; set; } = "";
-    /// <summary>1 = easy, 2 = medium, 3 = tricky.</summary>
-    public int Difficulty { get; set; } = 1;
-    public string Explanation { get; set; } = "";
+    /// <summary>Why the card belongs in its category; shown after the player answers.</summary>
+    public string Why { get; set; } = "";
 }
 
 /// <summary>Tunable game rules. Loaded from settings.json; every value has a safe default.</summary>
 public sealed class GameSettings
 {
-    public string EventTitle { get; set; } = "CAM";
+    public string EventTitle { get; set; } = "Label Legends";
     public int CardsPerRound { get; set; } = 15;
     public int PointsPerCorrect { get; set; } = 10;
     /// <summary>A correct answer earns <see cref="StreakBonus"/> once the streak reaches this length.</summary>
@@ -38,8 +36,6 @@ public sealed class GameSettings
     public int SecondsPerCard { get; set; } = 45;
     /// <summary>Attempts per name that count for the leaderboard. 0 = unlimited. Extra plays are practice.</summary>
     public int MaxOfficialAttempts { get; set; } = 1;
-    /// <summary>Percent mix of easy / medium / tricky cards in a round.</summary>
-    public int[] DifficultyMix { get; set; } = [40, 40, 20];
     public bool ShowFeedback { get; set; } = true;
     public bool SoundEnabled { get; set; } = true;
     public bool KioskMode { get; set; } = true;
@@ -52,6 +48,7 @@ public sealed class GameSettings
 public sealed class CardAnswer
 {
     public string CardId { get; set; } = "";
+    /// <summary>The card's scenario text at the time it was played (name kept for older results files).</summary>
     public string CardLabel { get; set; } = "";
     /// <summary>Null when the player ran out of time.</summary>
     public string? ChosenCategoryId { get; set; }
@@ -105,7 +102,7 @@ public sealed class QuizQuestion
 /// <summary>Tunable quiz rules. Loaded from quizSettings.json; every value has a safe default.</summary>
 public sealed class QuizSettings
 {
-    public string EventTitle { get; set; } = "CAM";
+    public string EventTitle { get; set; } = "Cyber Trivia";
     public int QuestionsPerRound { get; set; } = 15;
     public int PointsPerCorrect { get; set; } = 10;
     public int StreakThreshold { get; set; } = 3;

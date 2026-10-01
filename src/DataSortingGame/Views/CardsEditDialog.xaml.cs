@@ -27,16 +27,14 @@ public partial class CardsEditDialog : Window
 
     private static Card Clone(Card c) => new()
     {
-        Id = c.Id, Label = c.Label, Example = c.Example, CategoryId = c.CategoryId,
-        Difficulty = c.Difficulty, Explanation = c.Explanation,
+        Id = c.Id, Scenario = c.Scenario, CategoryId = c.CategoryId, Why = c.Why,
     };
 
     private CardListItem BuildItem(Card c)
     {
         var category = _state.Categories.FirstOrDefault(cat => cat.Id == c.CategoryId);
-        var diffText = c.Difficulty switch { 1 => "Easy", 3 => "Tricky", _ => "Medium" };
-        var label = c.Label.Length > 0 ? c.Label : "(untitled card)";
-        var summary = $"{category?.Name ?? "No category"} · {diffText}" + (c.Id.Length > 0 ? $" · {c.Id}" : "");
+        var label = c.Scenario.Length > 0 ? c.Scenario : "(empty scenario)";
+        var summary = (category?.Name ?? "No category") + (c.Id.Length > 0 ? $" · {c.Id}" : "");
         return new CardListItem(c, label, summary, Ui.Brush(category?.Color ?? "#607D8B"));
     }
 
@@ -46,11 +44,12 @@ public partial class CardsEditDialog : Window
         IEnumerable<Card> query = _cards;
         var term = SearchBox.Text.Trim();
         if (term.Length > 0)
-            query = query.Where(c => c.Label.Contains(term, StringComparison.OrdinalIgnoreCase)
+            query = query.Where(c => c.Scenario.Contains(term, StringComparison.OrdinalIgnoreCase)
                                       || c.Id.Contains(term, StringComparison.OrdinalIgnoreCase)
-                                      || c.Example.Contains(term, StringComparison.OrdinalIgnoreCase));
+                                      || c.Why.Contains(term, StringComparison.OrdinalIgnoreCase));
 
-        var items = query.OrderBy(c => c.Label, StringComparer.OrdinalIgnoreCase).Select(BuildItem).ToList();
+        // File order, so the list matches the spreadsheet the cards were converted from.
+        var items = query.Select(BuildItem).ToList();
 
         _suppressSelection = true;
         CardList.ItemsSource = items;
@@ -75,14 +74,10 @@ public partial class CardsEditDialog : Window
 
         _loading = true;
         IdBox.Text = card.Id;
-        LabelBox.Text = card.Label;
-        ExampleBox.Text = card.Example;
-        ExplanationBox.Text = card.Explanation;
+        ScenarioBox.Text = card.Scenario;
+        WhyBox.Text = card.Why;
         CategoryCombo.SelectedValue = card.CategoryId;
-        EasyRadio.IsChecked = card.Difficulty == 1;
-        MediumRadio.IsChecked = card.Difficulty == 2;
-        TrickyRadio.IsChecked = card.Difficulty == 3;
-        DetailHeader.Text = card.Label.Length > 0 ? card.Label : "New card";
+        DetailHeader.Text = card.Id.Length > 0 ? $"Card {card.Id}" : "New card";
         _loading = false;
 
         DetailScroll.Visibility = Visibility.Visible;
@@ -94,11 +89,9 @@ public partial class CardsEditDialog : Window
     {
         if (_selected == null) return;
         _selected.Id = IdBox.Text;
-        _selected.Label = LabelBox.Text;
-        _selected.Example = ExampleBox.Text;
-        _selected.Explanation = ExplanationBox.Text;
+        _selected.Scenario = ScenarioBox.Text;
+        _selected.Why = WhyBox.Text;
         _selected.CategoryId = (string?)CategoryCombo.SelectedValue ?? "";
-        _selected.Difficulty = TrickyRadio.IsChecked == true ? 3 : MediumRadio.IsChecked == true ? 2 : 1;
     }
 
     private void OnSearchChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) => RefreshList(_selected);
@@ -124,27 +117,20 @@ public partial class CardsEditDialog : Window
         RefreshList(_selected);
     }
 
-    private void OnDifficultyChanged(object sender, RoutedEventArgs e)
-    {
-        if (_loading || _selected == null) return;
-        CommitDetail();
-        RefreshList(_selected);
-    }
-
     private void OnAddCard(object sender, RoutedEventArgs e)
     {
         CommitDetail();
-        var card = new Card { CategoryId = _state.Categories.FirstOrDefault()?.Id ?? "", Difficulty = 1 };
+        var card = new Card { CategoryId = _state.Categories.FirstOrDefault()?.Id ?? "" };
         _cards.Add(card);
         SearchBox.Text = "";
         RefreshList(card);
-        LabelBox.Focus();
+        IdBox.Focus();
     }
 
     private void OnDeleteCurrent(object sender, RoutedEventArgs e)
     {
         if (_selected == null) return;
-        var name = _selected.Label.Length > 0 ? _selected.Label : _selected.Id.Length > 0 ? _selected.Id : "this card";
+        var name = _selected.Id.Length > 0 ? _selected.Id : "this card";
         if (!Confirm($"Delete '{name}'? This cannot be undone.")) return;
 
         _cards.Remove(_selected);
@@ -156,25 +142,17 @@ public partial class CardsEditDialog : Window
     {
         CommitDetail();
 
-        if (_cards.Count == 0)
-        {
-            Error("Add at least one card.");
-            return;
-        }
-
         var errors = new List<string>();
         var seenIds = new HashSet<string>();
         foreach (var card in _cards)
         {
             card.Id = card.Id.Trim();
-            card.Label = card.Label.Trim();
-            card.Example = (card.Example ?? "").Trim();
-            card.Explanation = (card.Explanation ?? "").Trim();
-            card.Difficulty = Math.Clamp(card.Difficulty, 1, 3);
+            card.Scenario = card.Scenario.Trim();
+            card.Why = (card.Why ?? "").Trim();
 
-            var name = card.Id.Length > 0 ? card.Id : card.Label.Length > 0 ? card.Label : "(blank card)";
-            if (card.Id.Length == 0 || card.Label.Length == 0)
-                errors.Add($"'{name}': needs both an id and a label.");
+            var name = card.Id.Length > 0 ? card.Id : card.Scenario.Length > 0 ? card.Scenario : "(blank card)";
+            if (card.Id.Length == 0 || card.Scenario.Length == 0)
+                errors.Add($"'{name}': needs both an id and a scenario.");
             else if (!seenIds.Add(card.Id))
                 errors.Add($"'{card.Id}': duplicate id.");
 

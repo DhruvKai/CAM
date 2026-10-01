@@ -23,9 +23,18 @@ public static partial class ConfigLoader
 {
     public const int MinCategories = 2;
     public const int MaxCategories = 6;
+    /// <summary>The quiz screen has four answer buttons.</summary>
+    public const int MaxQuizOptions = 4;
     private const string FallbackColor = "#607D8B";
+    /// <summary>Written next to cards.json to show the expected format; never loaded as cards.</summary>
+    public const string CardsSampleFileName = "cards.sample.json";
+    /// <summary>Written next to quizQuestions.json to show the expected format; never loaded as questions.</summary>
+    public const string QuizQuestionsSampleFileName = "quizQuestions.sample.json";
     private static readonly string[] FileNames =
-        ["categories.json", "cards.json", "settings.json", "quizQuestions.json", "quizSettings.json"];
+    [
+        "categories.json", "cards.json", "settings.json", "quizQuestions.json", "quizSettings.json",
+        CardsSampleFileName, QuizQuestionsSampleFileName,
+    ];
 
     public static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
     {
@@ -114,33 +123,40 @@ public static partial class ConfigLoader
         return result;
     }
 
+    /// <summary>An empty list is valid: the card game simply can't be started until cards are added.</summary>
     private static List<Card> ParseCards(List<Card> raw, List<Category> categories, List<string> warnings)
     {
         var result = new List<Card>();
         foreach (var c in raw)
         {
             c.Id = (c.Id ?? "").Trim();
-            c.Label = (c.Label ?? "").Trim();
-            var name = c.Id.Length > 0 ? c.Id : c.Label;
+            c.Scenario = (c.Scenario ?? "").Trim();
+            var name = c.Id.Length > 0 ? c.Id : c.Scenario;
+            var category = FindCategory(categories, c.CategoryId);
 
-            if (c.Id.Length == 0 || c.Label.Length == 0)
-                warnings.Add($"cards.json: a card without an id or label was skipped ('{name}').");
+            if (c.Id.Length == 0 || c.Scenario.Length == 0)
+                warnings.Add($"cards.json: a card without an id or scenario was skipped ('{name}').");
             else if (result.Any(x => x.Id == c.Id))
                 warnings.Add($"cards.json: duplicate card id '{c.Id}' was skipped.");
-            else if (categories.All(cat => cat.Id != c.CategoryId))
+            else if (category is null)
                 warnings.Add($"cards.json: card '{c.Id}' uses unknown categoryId '{c.CategoryId}' and was skipped.");
             else
             {
-                c.Difficulty = Math.Clamp(c.Difficulty, 1, 3);
-                c.Example ??= "";
-                c.Explanation ??= "";
+                c.CategoryId = category.Id;
+                c.Why = (c.Why ?? "").Trim();
                 result.Add(c);
             }
         }
-
-        if (result.Count == 0)
-            throw new ConfigException("cards.json: no valid cards were found.");
         return result;
+    }
+
+    /// <summary>Matches a category by id, or by its display name (e.g. "Highly Restricted"), ignoring case.</summary>
+    private static Category? FindCategory(List<Category> categories, string? idOrName)
+    {
+        var key = (idOrName ?? "").Trim();
+        return categories.FirstOrDefault(cat => cat.Id == key)
+               ?? categories.FirstOrDefault(cat => string.Equals(cat.Id, key, StringComparison.OrdinalIgnoreCase)
+                                                  || string.Equals(cat.Name, key, StringComparison.OrdinalIgnoreCase));
     }
 
     private static GameSettings ParseSettings(GameSettings s, List<string> warnings)
@@ -149,13 +165,7 @@ public static partial class ConfigLoader
         if (s.SecondsPerCard < 0) { warnings.Add("settings.json: secondsPerCard cannot be negative; using 0 (no limit)."); s.SecondsPerCard = 0; }
         if (s.MaxOfficialAttempts < 0) { warnings.Add("settings.json: maxOfficialAttempts cannot be negative; using 1."); s.MaxOfficialAttempts = 1; }
         if (s.IdleAttractSeconds < 0) s.IdleAttractSeconds = 0;
-
-        if (s.DifficultyMix is not { Length: 3 } || s.DifficultyMix.Any(m => m < 0) || s.DifficultyMix.Sum() == 0)
-        {
-            warnings.Add("settings.json: difficultyMix needs three non-negative numbers (easy, medium, tricky); using 40/40/20.");
-            s.DifficultyMix = [.. GameEngine.DefaultMix];
-        }
-        if (string.IsNullOrWhiteSpace(s.EventTitle)) s.EventTitle = "CAM";
+        if (string.IsNullOrWhiteSpace(s.EventTitle)) s.EventTitle = "Label Legends";
         if (string.IsNullOrWhiteSpace(s.AdminPin))
         {
             warnings.Add("settings.json: adminPin was empty; using 1234. Please change it.");
@@ -178,8 +188,8 @@ public static partial class ConfigLoader
                 warnings.Add($"quizQuestions.json: a question without an id or text was skipped ('{name}').");
             else if (result.Any(x => x.Id == q.Id))
                 warnings.Add($"quizQuestions.json: duplicate question id '{q.Id}' was skipped.");
-            else if (q.Options.Count < 2 || q.Options.Any(o => o.Length == 0))
-                warnings.Add($"quizQuestions.json: question '{q.Id}' needs at least 2 non-empty options and was skipped.");
+            else if (q.Options.Count is < 2 or > MaxQuizOptions || q.Options.Any(o => o.Length == 0))
+                warnings.Add($"quizQuestions.json: question '{q.Id}' needs 2 to {MaxQuizOptions} non-empty options and was skipped.");
             else if (q.CorrectIndex < 0 || q.CorrectIndex >= q.Options.Count)
                 warnings.Add($"quizQuestions.json: question '{q.Id}' has an out-of-range correctIndex and was skipped.");
             else
@@ -198,7 +208,7 @@ public static partial class ConfigLoader
         // The quiz always has a per-question time limit; unlike the sorting game, 0/off is not allowed.
         if (s.SecondsPerQuestion < 5) { warnings.Add("quizSettings.json: secondsPerQuestion must be at least 5; using 20."); s.SecondsPerQuestion = 20; }
         if (s.MaxOfficialAttempts < 0) { warnings.Add("quizSettings.json: maxOfficialAttempts cannot be negative; using 1."); s.MaxOfficialAttempts = 1; }
-        if (string.IsNullOrWhiteSpace(s.EventTitle)) s.EventTitle = "CAM";
+        if (string.IsNullOrWhiteSpace(s.EventTitle)) s.EventTitle = "Cyber Trivia";
         return s;
     }
 

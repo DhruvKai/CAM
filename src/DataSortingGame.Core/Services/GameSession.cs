@@ -61,7 +61,7 @@ public sealed class GameSession
         _answers.Add(new CardAnswer
         {
             CardId = card.Id,
-            CardLabel = card.Label,
+            CardLabel = card.Scenario,
             ChosenCategoryId = chosenCategoryId,
             CorrectCategoryId = card.CategoryId,
             Correct = correct,
@@ -70,7 +70,7 @@ public sealed class GameSession
         });
         _index++;
 
-        return new AnswerOutcome(correct, chosenCategoryId is null, points, bonus, card.CategoryId, card.Explanation);
+        return new AnswerOutcome(correct, chosenCategoryId is null, points, bonus, card.CategoryId, card.Why);
     }
 
     public PlayerResult ToResult(string playerName, string department, string employeeCode, bool isOfficial, DateTime? playedAtUtc = null) => new()

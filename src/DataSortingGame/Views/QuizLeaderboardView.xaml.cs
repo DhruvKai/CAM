@@ -23,6 +23,7 @@ public partial class QuizLeaderboardView : UserControl
     {
         _nav = nav;
         InitializeComponent();
+        TitleText.Text = $"{state.QuizSettings.EventTitle} leaderboard";
 
         IReadOnlyList<QuizLeaderboardEntry> board;
         try { board = QuizLeaderboard.Rank(state.QuizStore.LoadAll()); }
